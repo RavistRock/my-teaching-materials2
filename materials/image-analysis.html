@@ -45,27 +45,35 @@
 
         <div class="material-content">
             <h2>Введение</h2>
-            <p>Библиотеки Numpy и PIL (Python Imaging Library) позволяют работать с изображениями как с массивами данных.</p>
+            <p>В этом руководстве мы научимся работать с изображениями как с массивами данных, используя три мощные библиотеки Python:</p>
+                • PIL (Pillow) - для загрузки и базовой обработки изображений<br>
+                • NumPy - для работы с изображениями как с массивами<br>
+                • Matplotlib - для визуализации результатов<br>
 
-            <h2>Установка библиотек</h2>
+            <h2>1. Установка библиотек</h2>
             <div class="code-block">
-pip install numpy pillow
+pip install numpy pillow matplotlib
             </div>
 
-            <h2>Базовый пример</h2>
+            <h2>2. Базовый анализ изображения</h2>
+            <h2 style="color: purple;"> Загрузка изображения</h2>
             <div class="code-block">
-from PIL import Image
-import numpy as np
+from PIL import Image<br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
 
-# Загрузка изображения
-img = Image.open('image.jpg')
-img_array = np.array(img)
+# Загрузка изображения<br>
+image = Image.open('your_image.jpg')  # замените на путь к вашему изображению<br>
 
-print(f"Размер изображения: {img_array.shape}")
-print(f"Тип данных: {img_array.dtype}")
+# Преобразование в массив NumPy<br>
+image_array = np.array(image)<br>
+
+print(f"Размер изображения: {image_array.shape}")<br>
+print(f"Тип данных: {image_array.dtype}")<br>
+print(f"Диапазон значений: [{image_array.min()}, {image_array.max()}]")<br>
             </div>
 
-            <h2>Анализ пикселей</h2>
+            <!--<h2>Анализ пикселей</h2>
             <p>Каждое изображение представляется как трехмерный массив (высота × ширина × цветовые каналы).</p>
 
             <h2>Практическое задание</h2>
@@ -74,7 +82,112 @@ print(f"Тип данных: {img_array.dtype}")
                 <li>Выведите его размеры</li>
                 <li>Измените яркость</li>
                 <li>Сохраните результат</li>
-            </ol>
+            </ol> -->
+
+            <h2 style="color: purple;">Понимание структуры данных</h2>
+                • Градации серого: форма (высота, ширина) <br>
+                • RGB: форма (высота, ширина, 3)<br>
+                • RGBA: форма (высота, ширина, 4)<br>
+
+            <h2>3. Визуализация изображения</h2>
+             <div class="code-block">
+# Создание фигуры с несколькими subplots<br>
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))<br>
+
+# Исходное изображение<br>
+axes[0, 0].imshow(image_array)<br>
+axes[0, 0].set_title('Исходное изображение')<br>
+axes[0, 0].axis('off')<br>
+
+# Если изображение цветное, покажем отдельные каналы<br>
+if len(image_array.shape) == 3:<br>
+    # Красный канал<br>
+    axes[0, 1].imshow(image_array[:, :, 0], cmap='Reds')<br>
+    axes[0, 1].set_title('Красный канал')<br>
+    axes[0, 1].axis('off')<br>
+
+    # Зеленый канал<br>
+    axes[1, 0].imshow(image_array[:, :, 1], cmap='Greens')<br>
+    axes[1, 0].set_title('Зеленый канал')<br>
+    axes[1, 0].axis('off')<br>
+
+    # Синий канал<br>
+    axes[1, 1].imshow(image_array[:, :, 2], cmap='Blues')<br>
+    axes[1, 1].set_title('Синий канал')<br>
+    axes[1, 1].axis('off')<br>
+
+plt.tight_layout()<br>
+plt.show()<br>
+            </div>
+
+            <h2>4. Анализ гистограммы</h2>
+             <div class="code-block">
+             def analyze_histogram(image_array):<br>
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5))<br>
+
+    # Изображение<br>
+    axes[0].imshow(image_array)<br>
+    axes[0].set_title('Изображение')<br>
+    axes[0].axis('off')<br>
+
+    # Гистограмма<br>
+    if len(image_array.shape) == 3:  # Цветное изображение<br>
+     &emsp; colors = ['red', 'green', 'blue']   <br>
+      &emsp;  for i, color in enumerate(colors):<br>
+              &emsp; &emsp; &emsp; histogram, bins = np.histogram(image_array[:, :, i], bins=256, range=(0, 255))<br>
+            &emsp; &emsp; &emsp; axes[1].plot(bins[:-1], histogram,color=color, alpha=0.7, label=f'{color} канал')<br>
+    else:  # Градации серого<br>
+        &emsp; histogram, bins = np.histogram(image_array, bins=256, range=(0, 255))<br>
+        &emsp; axes[1].plot(bins[:-1], histogram, color='black', alpha=0.7)<br>
+
+    axes[1].set_title('Гистограмма распределения интенсивности')<br>
+    axes[1].set_xlabel('Значение пикселя')<br>
+    axes[1].set_ylabel('Частота')<br>
+    axes[1].legend()<br>
+    axes[1].grid(True, alpha=0.3)<br>
+
+    plt.tight_layout()<br>
+    plt.show()<br>
+
+analyze_histogram(image_array)<br>
+               </div>
+                <h2>5. Базовые операции с изображением</h2>
+                 <h2 style="color: purple;"> Изменение яркости</h2>
+             <div class="code-block">
+             def adjust_brightness(image_array, factor):<br>
+                &emsp; """<br>
+                &emsp;factor > 1 - увеличить яркость<br>
+                 &emsp;factor < 1 - уменьшить яркость<br>
+                 &emsp;"""<br>
+                 &emsp;adjusted = np.clip(image_array.astype(np.float32) * factor, 0, 255)<br>
+                 &emsp;return adjusted.astype(np.uint8)<br>
+
+bright_image = adjust_brightness(image_array, 1.5)<br>
+dark_image = adjust_brightness(image_array, 0.7)<br>
+
+# Визуализация результатов<br>
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))<br>
+
+axes[0].imshow(image_array)<br>
+axes[0].set_title('Исходное')<br>
+axes[0].axis('off')<br>
+
+axes[1].imshow(bright_image)<br>
+axes[1].set_title('Яркое (+50%)')<br>
+axes[1].axis('off')<br>
+
+axes[2].imshow(dark_image)<br>
+axes[2].set_title('Темное (-30%)')<br>
+axes[2].axis('off')<br>
+
+plt.tight_layout()<br>
+plt.show()<br>
+
+             </div>
+            <h2 style="color: purple;"> Преобразование в градации серого</h2>
+            <div class="code-block">
+
+             </div>
 
             <div class="download-links">
                 <a href="#" class="download-btn">Скачать пример кода</a>
